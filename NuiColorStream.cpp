@@ -8,6 +8,11 @@
 #include "NuiColorStream.h"
 #include "NuiStreamViewer.h"
 
+#include <fstream>
+#include <iomanip>
+#include <sstream>
+
+
 /// <summary>
 /// Constructor
 /// </summary>
@@ -172,6 +177,17 @@ void NuiColorStream::ProcessColor()
 
         default:    // Copy color data to image buffer
             m_imageBuffer.CopyRGB(lockedRect.pBits, lockedRect.size);
+            std::wstringstream ss;
+            SYSTEMTIME st;
+            GetLocalTime(&st);
+            wchar_t timebuf[64];
+            swprintf_s(timebuf, L"%04d%02d%02d_%02d%02d%02d",
+                st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
+
+            ss << L"CapturedRGB\\rgb_" << timebuf << L"_" << GetTickCount64() % 1000 << L".bmp";
+
+            CreateDirectory(L"CapturedRGB", NULL);
+            SaveRGBToBitmap(lockedRect.pBits, 640, 480, ss.str());
             break;
         }
 
@@ -187,4 +203,37 @@ void NuiColorStream::ProcessColor()
 
 ReleaseFrame:
     m_pNuiSensor->NuiImageStreamReleaseFrame(m_hStreamHandle, &imageFrame);
+}
+
+HRESULT SaveRGBToBitmap(const BYTE* pBuffer, int width, int height, const std::wstring& filename)
+{
+    BITMAPFILEHEADER bfh = { 0 };
+    BITMAPINFOHEADER bih = { 0 };
+
+    int stride = width * 4;
+
+    bfh.bfType = 0x4D42; // 'BM'
+    bfh.bfSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + stride * height;
+    bfh.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+
+    bih.biSize = sizeof(BITMAPINFOHEADER);
+    bih.biWidth = width;
+    bih.biHeight = -height; // top-down bitmap
+    bih.biPlanes = 1;
+    bih.biBitCount = 32;
+    bih.biCompression = BI_RGB;
+
+    std::wofstream tsfile(L"timestamps.txt", std::ios::app);
+    if (tsfile) {
+        tsfile << filename << L"\t" << GetTickCount64() << L"\n";
+    }
+
+    std::ofstream file(filename, std::ios::binary);
+    if (!file) return E_FAIL;
+
+    file.write((char*)&bfh, sizeof(bfh));
+    file.write((char*)&bih, sizeof(bih));
+    file.write((char*)pBuffer, stride * height);
+
+    return S_OK;
 }

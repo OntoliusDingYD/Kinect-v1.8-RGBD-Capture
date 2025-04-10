@@ -9,6 +9,8 @@
 #include "NuiStream.h"
 #include "NuiImageBuffer.h"
 
+#include <string>
+
 class NuiColorStream : public NuiStream
 {
 public:
@@ -71,3 +73,5 @@ private:
     NUI_IMAGE_RESOLUTION m_imageResolution;
     NuiImageBuffer       m_imageBuffer;
 };
+
+HRESULT SaveRGBToBitmap(const BYTE* buf, int w, int h, const std::wstring& name);
