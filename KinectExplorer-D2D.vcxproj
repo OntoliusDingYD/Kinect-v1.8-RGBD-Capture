@@ -157,6 +157,7 @@
     <ClInclude Include="CameraColorSettingsViewer.h" />
     <ClInclude Include="CameraExposureSettingsViewer.h" />
     <ClInclude Include="CameraSettingsViewer.h" />
+    <ClInclude Include="stb_image_write.h" />
     <ClInclude Include="Utility.h" />
     <ClInclude Include="ImageRenderer.h" />
     <ClInclude Include="CustomDrawListControl.h" />

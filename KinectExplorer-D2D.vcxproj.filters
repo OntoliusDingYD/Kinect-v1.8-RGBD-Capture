@@ -51,6 +51,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="StaticMediaBuffer.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="stb_image_write.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="KinectExplorer.rc" />
