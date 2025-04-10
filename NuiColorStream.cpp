@@ -182,17 +182,22 @@ void NuiColorStream::ProcessColor()
             if (timestamp)
             {
                 // 构造路径
-                std::wstringstream ss;
-                ss << L"CapturedRGB\\rgb_" << timestamp << L".bmp";
-                std::wstring filename = ss.str();
+                std::wstringstream wss;
+                wss << L"CapturedRGB\\rgb_" << timestamp << L".bmp";
+                std::wstring wfilename = wss.str();
 
                 CreateDirectory(L"CapturedRGB", NULL);
-                SaveRGBToBitmap(lockedRect.pBits, 1280, 960, filename.c_str());
+                SaveRGBToBitmap(lockedRect.pBits, 1280, 960, wfilename.c_str());
 
                 // associations 文件由 RGB 控制写入
                 std::wofstream log(L"associations.txt", std::ios::app);
                 if (log)
                     log << timestamp << L" rgb/rgb_" << timestamp << L".bmp depth/depth_" << timestamp << L".png" << std::endl;
+
+                std::wofstream rgblog(L"rgb_timestamps.txt", std::ios::app);
+                if (rgblog)
+                    rgblog << timestamp << L"\t" << wfilename << std::endl;
+
             }
             break;
         }
@@ -228,11 +233,6 @@ HRESULT SaveRGBToBitmap(const BYTE* pBuffer, int width, int height, const std::w
     bih.biPlanes = 1;
     bih.biBitCount = 32;
     bih.biCompression = BI_RGB;
-
-    std::wofstream tsfile(L"rgb_timestamps.txt", std::ios::app);
-    if (tsfile) {
-        tsfile << filename << L"\t" << GetTickCount64() << L"\n";
-    }
 
     std::ofstream file(filename, std::ios::binary);
     if (!file) return E_FAIL;
