@@ -55,7 +55,7 @@ NuiStreamViewer* NuiColorStream::SetStreamViewer(NuiStreamViewer* pStreamViewer)
 HRESULT NuiColorStream::StartStream()
 {
     SetImageType(NUI_IMAGE_TYPE_COLOR);                 // Set default image type to color image
-    SetImageResolution(NUI_IMAGE_RESOLUTION_640x480);   // Set default image resolution to 640x480
+	SetImageResolution(NUI_IMAGE_RESOLUTION_1280x960);   // Set default image resolution to 640x480(No) 1280x960(Yes)
     return OpenStream();
 }
 
@@ -187,7 +187,7 @@ void NuiColorStream::ProcessColor()
             ss << L"CapturedRGB\\rgb_" << timebuf << L"_" << GetTickCount64() % 1000 << L".bmp";
 
             CreateDirectory(L"CapturedRGB", NULL);
-            SaveRGBToBitmap(lockedRect.pBits, 640, 480, ss.str());
+            SaveRGBToBitmap(lockedRect.pBits, 1280, 960, ss.str());
             break;
         }
 
