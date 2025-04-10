@@ -23,6 +23,7 @@
     <ClCompile Include="NuiStreamViewer.cpp" />
     <ClCompile Include="NuiTiltAngleViewer.cpp" />
     <ClCompile Include="NuiViewer.cpp" />
+    <ClCompile Include="Utility.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraColorSettingsViewer.h" />

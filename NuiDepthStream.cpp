@@ -19,6 +19,10 @@
 #include <ctime>
 #include <windows.h>
 
+#include "Utility.h"
+
+static ULONGLONG lastDepthSaved = 0;
+
 /// <summary>
 /// Constructor
 /// <summary>
@@ -171,31 +175,27 @@ void NuiDepthStream::ProcessDepth()
             m_pStreamViewer->SetImage(&m_imageBuffer);
         }
 
-        static ULONGLONG lastSaveTime = 0;
-        ULONGLONG now = GetTickCount64();
-
-        if (now - lastSaveTime >= 200)
+        ULONGLONG timestamp = PeekLastSyncedTimestamp();  // 读取最后一次 RGB 触发的时间戳
+        if (timestamp && timestamp != lastDepthSaved)     // 避免重复保存
         {
-            lastSaveTime = now;
-
-            // 创建目录
+            lastDepthSaved = timestamp;
             CreateDirectory(L"CapturedDepth", NULL);
 
-            // 文件名（宽字节转string）
             std::wstringstream wss;
-            wss << L"CapturedDepth\\depth_" << now << L".png";
+            wss << L"CapturedDepth\\depth_" << timestamp << L".png";
             std::wstring wfilename = wss.str();
             std::string filename(wfilename.begin(), wfilename.end());
 
-            // 保存 16-bit PNG，channel = 2 表示每像素2字节
+            // 保存 16-bit 深度图，channel=2 表示16-bit灰度
             stbi_write_png(filename.c_str(), 640, 480, 2, lockedRect.pBits, 640 * 2);
 
-            // 写入日志
+            // 可选：写入 depth 日志
             std::wofstream log(L"depth_timestamps.txt", std::ios::app);
             if (log) {
-                log << now << L"\t" << wfilename << std::endl;
+                log << timestamp << L"\t" << wfilename << std::endl;
             }
         }
+
     }
 
     // Done with the texture. Unlock and release it

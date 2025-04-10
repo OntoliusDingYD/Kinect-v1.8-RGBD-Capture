@@ -12,6 +12,7 @@
 #include <iomanip>
 #include <sstream>
 
+#include "Utility.h"
 
 /// <summary>
 /// Constructor
@@ -177,17 +178,22 @@ void NuiColorStream::ProcessColor()
 
         default:    // Copy color data to image buffer
             m_imageBuffer.CopyRGB(lockedRect.pBits, lockedRect.size);
-            std::wstringstream ss;
-            SYSTEMTIME st;
-            GetLocalTime(&st);
-            wchar_t timebuf[64];
-            swprintf_s(timebuf, L"%04d%02d%02d_%02d%02d%02d",
-                st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
+			ULONGLONG timestamp = GetSynchronizedTimestamp();  // 触发同步时间戳
+            if (timestamp)
+            {
+                // 构造路径
+                std::wstringstream ss;
+                ss << L"CapturedRGB\\rgb_" << timestamp << L".bmp";
+                std::wstring filename = ss.str();
 
-            ss << L"CapturedRGB\\rgb_" << timebuf << L"_" << GetTickCount64() % 1000 << L".bmp";
+                CreateDirectory(L"CapturedRGB", NULL);
+                SaveRGBToBitmap(lockedRect.pBits, 1280, 960, filename.c_str());
 
-            CreateDirectory(L"CapturedRGB", NULL);
-            SaveRGBToBitmap(lockedRect.pBits, 1280, 960, ss.str());
+                // associations 文件由 RGB 控制写入
+                std::wofstream log(L"associations.txt", std::ios::app);
+                if (log)
+                    log << timestamp << L" rgb/rgb_" << timestamp << L".bmp depth/depth_" << timestamp << L".png" << std::endl;
+            }
             break;
         }
 
@@ -223,7 +229,7 @@ HRESULT SaveRGBToBitmap(const BYTE* pBuffer, int width, int height, const std::w
     bih.biBitCount = 32;
     bih.biCompression = BI_RGB;
 
-    std::wofstream tsfile(L"timestamps.txt", std::ios::app);
+    std::wofstream tsfile(L"rgb_timestamps.txt", std::ios::app);
     if (tsfile) {
         tsfile << filename << L"\t" << GetTickCount64() << L"\n";
     }
