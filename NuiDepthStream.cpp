@@ -9,6 +9,16 @@
 #include "NuiDepthStream.h"
 #include "NuiStreamViewer.h"
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
+
+#include <fstream>
+#include <string>
+#include <sstream>
+#include <iomanip>
+#include <ctime>
+#include <windows.h>
+
 /// <summary>
 /// Constructor
 /// <summary>
@@ -159,6 +169,32 @@ void NuiDepthStream::ProcessDepth()
         if (m_pStreamViewer)
         {
             m_pStreamViewer->SetImage(&m_imageBuffer);
+        }
+
+        static ULONGLONG lastSaveTime = 0;
+        ULONGLONG now = GetTickCount64();
+
+        if (now - lastSaveTime >= 200)
+        {
+            lastSaveTime = now;
+
+            // 创建目录
+            CreateDirectory(L"CapturedDepth", NULL);
+
+            // 文件名（宽字节转string）
+            std::wstringstream wss;
+            wss << L"CapturedDepth\\depth_" << now << L".png";
+            std::wstring wfilename = wss.str();
+            std::string filename(wfilename.begin(), wfilename.end());
+
+            // 保存 16-bit PNG，channel = 2 表示每像素2字节
+            stbi_write_png(filename.c_str(), 640, 480, 2, lockedRect.pBits, 640 * 2);
+
+            // 写入日志
+            std::wofstream log(L"depth_timestamps.txt", std::ios::app);
+            if (log) {
+                log << now << L"\t" << wfilename << std::endl;
+            }
         }
     }
 

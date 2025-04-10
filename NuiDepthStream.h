@@ -9,6 +9,8 @@
 #include "NuiStream.h"
 #include "NuiImageBuffer.h"
 
+#include <string>
+
 class NuiDepthStream : public NuiStream
 {
 public:
