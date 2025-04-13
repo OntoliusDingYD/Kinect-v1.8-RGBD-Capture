@@ -110,5 +110,5 @@ void CompareUpdateValue(const T newValue, T& storedValue, HWND hWnd, UINT contro
     }
 }
 
-ULONGLONG GetSynchronizedTimestamp();   // 使得RGB和Depth图像的时间戳同步（RGB主导）
-ULONGLONG PeekLastSyncedTimestamp();    // 获取上一个同步的时间戳（Depth从属）
+double GetSynchronizedTimestamp();   // 使得RGB和Depth图像的时间戳同步（RGB主导）
+double PeekLastSyncedTimestamp();    // 获取上一个同步的时间戳（Depth从属）

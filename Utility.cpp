@@ -1,20 +1,25 @@
 #include "Utility.h"
+#include <chrono>
 
-static ULONGLONG lastSave = 0;
+static double lastSave = 0.0;
 
-ULONGLONG GetSynchronizedTimestamp()
+double GetSynchronizedTimestamp()
 {
-    ULONGLONG now = GetTickCount64();
+	using namespace std::chrono;
+	auto now = system_clock::now();
+	auto epoch = now.time_since_epoch();
+	auto micros = duration_cast<microseconds>(epoch).count();
 
-    if (now - lastSave >= 200)
+	double now_time = micros / 1e6;
+	if (now_time - lastSave >= 0.2)     // µ•Œª£∫√Î
     {
-        lastSave = now;
-        return now;
+        lastSave = now_time;
+        return now_time;
     }
     return 0;
 }
 
-ULONGLONG PeekLastSyncedTimestamp()
+double PeekLastSyncedTimestamp()
 {
     return lastSave;
 }

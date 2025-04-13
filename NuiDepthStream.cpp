@@ -21,7 +21,7 @@
 
 #include "Utility.h"
 
-static ULONGLONG lastDepthSaved = 0;
+static double lastDepthSaved = 0;
 
 /// <summary>
 /// Constructor
@@ -175,24 +175,24 @@ void NuiDepthStream::ProcessDepth()
             m_pStreamViewer->SetImage(&m_imageBuffer);
         }
 
-        ULONGLONG timestamp = PeekLastSyncedTimestamp();  // 读取最后一次 RGB 触发的时间戳
+        double timestamp = PeekLastSyncedTimestamp();  // 读取最后一次 RGB 触发的时间戳
         if (timestamp && timestamp != lastDepthSaved)     // 避免重复保存
         {
             lastDepthSaved = timestamp;
-            CreateDirectory(L"CapturedDepth", NULL);
+            CreateDirectory(L"depth", NULL);
 
             std::wstringstream wss;
-            wss << L"CapturedDepth\\depth_" << timestamp << L".png";
+            wss << L"depth\\depth_" << std::fixed << std::setprecision(6) << timestamp << L".png";
             std::wstring wfilename = wss.str();
             std::string filename(wfilename.begin(), wfilename.end());
 
-            // 保存 16-bit 深度图，channel=2 表示16-bit灰度
-            stbi_write_png(filename.c_str(), 640, 480, 2, lockedRect.pBits, 640 * 2);
+            // 保存 16-bit 深度图，channel=1 表示16-bit灰度；此处存疑“是否能确实的存下16bit深度图”，若不行则尝试libpng Ontolius 250413 1415
+            stbi_write_png(filename.c_str(), 640, 480, 1, lockedRect.pBits, 640 * 2);
 
             // 可选：写入 depth 日志
-            std::wofstream log(L"depth_timestamps.txt", std::ios::app);
-            if (log) {
-                log << timestamp << L"\t" << wfilename << std::endl;
+            std::wofstream depthlog(L"depth.txt", std::ios::app);
+            if (depthlog) {
+                depthlog << std::fixed << std::setprecision(6) << timestamp << L"\t" << wfilename << std::endl;
             }
         }
 

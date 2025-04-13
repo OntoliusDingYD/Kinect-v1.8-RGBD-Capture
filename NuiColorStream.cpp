@@ -178,25 +178,27 @@ void NuiColorStream::ProcessColor()
 
         default:    // Copy color data to image buffer
             m_imageBuffer.CopyRGB(lockedRect.pBits, lockedRect.size);
-			ULONGLONG timestamp = GetSynchronizedTimestamp();  // 触发同步时间戳
+			double timestamp = GetSynchronizedTimestamp();  // 触发同步时间戳
             if (timestamp)
             {
                 // 构造路径
                 std::wstringstream wss;
-                wss << L"CapturedRGB\\rgb_" << timestamp << L".bmp";
+                wss << L"rgb\\rgb_" << std::fixed << std::setprecision(6) << timestamp << L".bmp";
                 std::wstring wfilename = wss.str();
 
-                CreateDirectory(L"CapturedRGB", NULL);
+                CreateDirectory(L"rgb", NULL);
                 SaveRGBToBitmap(lockedRect.pBits, 1280, 960, wfilename.c_str());
 
                 // associations 文件由 RGB 控制写入
                 std::wofstream log(L"associations.txt", std::ios::app);
                 if (log)
-                    log << timestamp << L" rgb/rgb_" << timestamp << L".bmp depth/depth_" << timestamp << L".png" << std::endl;
+                    log << std::fixed << std::setprecision(6)
+                        << timestamp << L" rgb/rgb_" << timestamp << L".bmp"
+                        << L" depth/depth_" << timestamp << L".png" << std::endl;
 
-                std::wofstream rgblog(L"rgb_timestamps.txt", std::ios::app);
+                std::wofstream rgblog(L"rgb.txt", std::ios::app);
                 if (rgblog)
-                    rgblog << timestamp << L"\t" << wfilename << std::endl;
+                    rgblog << std::fixed << std::setprecision(6) << timestamp << L"\t" << wfilename << std::endl;
 
             }
             break;
