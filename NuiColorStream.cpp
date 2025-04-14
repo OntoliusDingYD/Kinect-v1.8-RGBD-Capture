@@ -12,7 +12,7 @@
 #include <iomanip>
 #include <sstream>
 
-#include "Utility.h"
+#include <chrono>
 
 /// <summary>
 /// Constructor
@@ -178,29 +178,28 @@ void NuiColorStream::ProcessColor()
 
         default:    // Copy color data to image buffer
             m_imageBuffer.CopyRGB(lockedRect.pBits, lockedRect.size);
-			double timestamp = GetSynchronizedTimestamp();  // 触发同步时间戳
-            if (timestamp)
-            {
-                // 构造路径
-                std::wstringstream wss;
-                wss << L"rgb\\rgb_" << std::fixed << std::setprecision(6) << timestamp << L".bmp";
-                std::wstring wfilename = wss.str();
+            using namespace std::chrono;
+            auto now = system_clock::now();
+            auto epoch = now.time_since_epoch();
+            double timestamp = duration_cast<microseconds>(epoch).count() / 1e6;
 
-                CreateDirectory(L"rgb", NULL);
-                SaveRGBToBitmap(lockedRect.pBits, 640, 480, wfilename.c_str());
+            std::wstringstream wss;
+            wss << L"rgb\\rgb_" << std::fixed << std::setprecision(6) << timestamp << L".bmp";
+            std::wstring wfilename = wss.str();
 
-                // associations 文件由 RGB 控制写入
-                std::wofstream log(L"associations.txt", std::ios::app);
-                if (log)
-                    log << std::fixed << std::setprecision(6)
-                        << timestamp << L" rgb/rgb_" << timestamp << L".bmp"
-                        << L" depth/depth_" << timestamp << L".png" << std::endl;
+            CreateDirectory(L"rgb", NULL);
+            SaveRGBToBitmap(lockedRect.pBits, 640, 480, wfilename.c_str());
 
-                std::wofstream rgblog(L"rgb.txt", std::ios::app);
-                if (rgblog)
-                    rgblog << std::fixed << std::setprecision(6) << timestamp << L"\t" << wfilename << std::endl;
+            // associations 文件由 RGB 控制写入
+            std::wofstream log(L"associations.txt", std::ios::app);
+            if (log)
+                log << std::fixed << std::setprecision(6)
+                << timestamp << L" rgb/rgb_" << timestamp << L".bmp"
+                << L" depth/depth_" << timestamp << L".png" << std::endl;
 
-            }
+            std::wofstream rgblog(L"rgb.txt", std::ios::app);
+            if (rgblog)
+                rgblog << std::fixed << std::setprecision(6) << timestamp << L"\t" << wfilename << std::endl;
             break;
         }
 
