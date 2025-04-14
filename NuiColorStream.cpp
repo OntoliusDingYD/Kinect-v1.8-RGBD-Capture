@@ -191,11 +191,13 @@ void NuiColorStream::ProcessColor()
             SaveRGBToBitmap(lockedRect.pBits, 640, 480, wfilename.c_str());
 
             // associations 文件由 RGB 控制写入
+            /*
             std::wofstream log(L"associations.txt", std::ios::app);
             if (log)
                 log << std::fixed << std::setprecision(6)
                 << timestamp << L" rgb/rgb_" << timestamp << L".bmp"
                 << L" depth/depth_" << timestamp << L".png" << std::endl;
+            */
 
             std::wofstream rgblog(L"rgb.txt", std::ios::app);
             if (rgblog)
