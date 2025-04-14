@@ -56,7 +56,7 @@ NuiStreamViewer* NuiColorStream::SetStreamViewer(NuiStreamViewer* pStreamViewer)
 HRESULT NuiColorStream::StartStream()
 {
     SetImageType(NUI_IMAGE_TYPE_COLOR);                 // Set default image type to color image
-	SetImageResolution(NUI_IMAGE_RESOLUTION_1280x960);   // Set default image resolution to 640x480(No) 1280x960(Yes)
+	SetImageResolution(NUI_IMAGE_RESOLUTION_640x480);   // Set default image resolution to 640x480(@30fps) or 1280x960(@10fps)
     return OpenStream();
 }
 
@@ -187,7 +187,7 @@ void NuiColorStream::ProcessColor()
                 std::wstring wfilename = wss.str();
 
                 CreateDirectory(L"rgb", NULL);
-                SaveRGBToBitmap(lockedRect.pBits, 1280, 960, wfilename.c_str());
+                SaveRGBToBitmap(lockedRect.pBits, 640, 480, wfilename.c_str());
 
                 // associations 文件由 RGB 控制写入
                 std::wofstream log(L"associations.txt", std::ios::app);
